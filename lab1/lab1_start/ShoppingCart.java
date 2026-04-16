@@ -32,13 +32,12 @@ public class ShoppingCart {
                 continue;
             }
 
-            if (wallet.getBalance() < price) {
-                System.out.println("Not enough credits.");
-                break;
+            boolean success = wallet.safeWithdraw(price);
+            if(success) {
+                pocket.addProduct(product);
+            } else {
+                System.out.println("Purchase failed");
             }
-
-            wallet.setBalance(wallet.getBalance() - price);
-            pocket.addProduct(product);
 
             print(wallet, pocket);
             product = scan(scanner);

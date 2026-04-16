@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;  
 
 
 public class Pocket {
@@ -13,12 +15,18 @@ public class Pocket {
     private RandomAccessFile file;
 
     /**
+     * Used for locks.
+     */
+    private FileChannel channel;
+
+    /**
      * Creates a Pocket object
      * 
      * A Pocket object interfaces with the pocket RandomAccessFile.
      */
     public Pocket () throws Exception {
         this.file = new RandomAccessFile(new File("backEnd/pocket.txt"), "rw");
+        this.channel = file.getChannel();   
     }
 
     /**
@@ -27,8 +35,14 @@ public class Pocket {
      * @param  product           product name to add to the pocket (e.g. "car")
      */
     public void addProduct(String product) throws Exception {
-        this.file.seek(this.file.length());
-        this.file.writeBytes(product+'\n'); 
+        FileLock lock = channel.lock(); // Exclusive LOCK
+        try {
+            this.file.seek(this.file.length());
+            Thread.sleep(10000);
+            this.file.writeBytes(product+'\n'); 
+        } finally {
+            lock.release();
+        }
     }
 
     /**
@@ -37,15 +51,20 @@ public class Pocket {
      * @return a string representing the pocket
      */
     public String getPocket() throws Exception {
-        StringBuilder sb = new StringBuilder();
-        this.file.seek(0);
-        String line;
-        while((line = this.file.readLine()) != null) {
-            sb.append(line);
-            sb.append('\n');
-        }
+        FileLock lock = channel.lock(0, Long.MAX_VALUE, true); // shared LOCK
+        try {
+            StringBuilder sb = new StringBuilder();
+            this.file.seek(0);
+            String line;
+            while((line = this.file.readLine()) != null) {
+                sb.append(line);
+                sb.append('\n');
+            }
 
-        return sb.toString();
+            return sb.toString();
+        } finally {
+            lock.release();
+        }
     }
 
     /**
