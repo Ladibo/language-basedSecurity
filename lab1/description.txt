@@ -1,0 +1,91 @@
+Introduction
+The purpose of this assignment is to explore the time of check to time of use (TOCTOU) vulnerability and its protection methods.
+
+In this lab, you will write a Java application using a buggy API. After exploiting that application, you will suggest a fix.
+
+Part 0: The scenario and base program
+You have to write a frontend for a command line shopping cart. The application (called ShoppingCart.java) has to:
+
+print the current balance of the user
+print the product list and their prices
+print the current pocket of the user
+ask a product to buy
+check if the amount of credits is enough, if not stop the execution.
+otherwise, withdraw the price of the product from the wallet.
+add the name of the product to the pocket file.
+repeat the steps until the user exits
+If the ShoppingCart exits, it must exit normally. In the stub given with the backend (here Download here), steps 1-4 and step 8 are already implemented.
+
+This is an example after running make all:
+
+$ java ShoppingCart
+Your balance: 30000 credits
+pen     40
+car     30000
+candies 1
+book    100
+Your current pocket is:
+
+
+What do you want to buy? (type quit to stop): <insert a product name, e.g. pen>
+Your balance: 29960 credits
+pen     40
+car     30000
+candies 1
+book    100
+Your current pocket is:
+pen
+
+What do you want to buy? (type quit to stop): quit
+
+$ cat backEnd/pocket.txt
+pen
+
+$ cat backEnd/wallet.txt
+29960
+We provide the backend and a stub for the shopping cart here Download here(the API is documented in the source code), which includes:
+ShoppingCart.java: the stub for the frontend, which you must complete.
+Makefile: used to compile (make all), clean (make clean) and reset the wallet and pocket (make resetFiles).
+backEnd/Wallet.java: Interacts with the wallet.
+backEnd/Pocket.java: Interacts with the pocket.
+backEnd/Store.java: Interacts with the product options and prices.
+To run, execute the command make all, and then java ShoppingCart.
+
+ 
+
+Part 1: Exploit your program
+The goal is to attack the program and exploit a race condition in this system. Can you get a car but paying less than its value? We assume the attacker does not have access to the backend and thus is not allowed to modify the files pocket.txt nor wallet.txt other than through the APIs. The attacker is the end user in the sense that they can only interact with the frontend but cannot modify the source code. Hint: it is allowed to artificially delay actions or to set break points to make the attack work reliably, for the sake of the presentation.
+
+What is the shared resource? Who is sharing it?
+What is the root of the problem?
+Explain in detail how you can attack this system.
+Provide the program output and result, explaining the interleaving to achieve them.
+ 
+
+ 
+
+Part 2: Fix the API
+The goal is to fix the API to avoid the vulnerability.
+
+Write a Wallet method implementing the necessary protections:
+public boolean safeWithdraw(int valueToWithdraw) throws Exception
+The method returns true if the withdraw was possible (i.e. the user had enough balance), and returns false otherwise.
+Were there other APIs or resources suffering from possible races? If so, please explain them and update the APIs to eliminate any race problems.
+When eliminating all race problems, it is important to not implement the protections too aggressively, as it could lead to performance hits in the real world. This is something you should consider in the lab.
+Why are these protections enough and at the same time not too excessive? Make sure to test that the attack from Part 1 now fails.
+Make sure that your solution works outside any IDE you might use.
+ 
+
+Report
+Please, submit a report that includes in addition to your answers to the questions above:
+
+Part 0: your ShoppingCart.java with clear instructions on how to compile and run it.
+Part 1: the output logs and explanations how to get them
+Part 2: the entire code that secures buggy API(s) as well as the screenshots before and after the implemented security patch
+Along with the report, include all of the code in an archive (lab1.tar.gz or lab1.zip), when submitting.
+
+Use the Fire system to submit your assignments. 
+
+Important: Submissions with poor discussions of countermeasures will be rejected.  If you are unsure what countermeasures to cover, it should be at least the ones discussed in the lectures!
+
+Important: You need to meet the requirements for a written report that documents your lab solution and pass a lab presentation with the TA who graded it, no later than 2 weeks after passing the written part (new in 2026). During the presentation, each student in the group must individually demonstrate sufficient understanding of the submitted solution, explain key design and implementation choices, and answer questions about the code and report. The presentation will be used to verify that all group members have actively contributed to the work and can account for the solution independently. 

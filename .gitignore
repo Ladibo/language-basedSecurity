@@ -1,0 +1,18 @@
+# Java compiled output
+*.class
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Course material (downloaded archives/zips)
+*.zip
+*.tar.gz
+*.pdf
+coursematerial/
