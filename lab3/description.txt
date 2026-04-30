@@ -1,0 +1,79 @@
+Introduction
+The purpose of this assignment is to explore vulnerabilities and protection methods in web applications.
+
+In this lab, you are going to locate and exploit a Cross-Site Scripting (XSS). Using this vector, you will get administrator access to the system by a cookie hijacking attack. Once in the administration pages, you will find and exploit an SQL injection to gain code execution.
+
+The web application
+The web application used in this lab is from PentesterLabLinks to an external site. and represents a CMS blogging platform. It is a bootable CD in ISO format that you can boot from in your VirtualBox, VMware, or QEMU:
+
+xss_and_mysql_file_i386.iso (32-bit, 178M, MD5: c9c7a31ab9bf79b82b72b58bb0a3a657)
+If you run it correctly you should be met with a terminal showing "user@debian:~$", this means the VM is running correctly. Next you need to forward the port from the guest to the host. Depending on your virtual machine configuration, you might create a port redirection to the virtual host tcp/80 port.
+In VirtualBox you can go to Settings -> Network -> Advanced -> Port Forwarding and add a rule with Host Port 8080 and Guest Port 80 (You can leave IPs blank, Protocol should be TCP).
+In case you'd like to use Chalmers remote machine, you can connect via Remote DesktopLinks to an external site. to your Linux instance. Then, you should be able to use QEMU to run the web app server by running `qemu-system-x86_64 -cdrom PATH/TO/xss_and_mysql_file_i386.iso -nic user,hostfwd=tcp::8080-:80`. 
+The system includes a PhantomJS script that simulates an administrator visiting every page of the website every minute.
+
+Note: All attacks can be launched from the client-side, by merely using a browser. You are not allowed to look at the application code on the server itself (just like in reality).
+
+Part 1: Cross-Site Scripting (XSS)
+Your objective is to find an XSS vulnerability to perform a Session Hijacking attack and gain administration clearance in the web application.
+
+In the report you should include:
+Describe the XSS vulnerabilitie(s) you found
+A detailed, step-by-step description of the attack that you have designed to hijack the administrator session information
+Include a comprehensive discussion of possible countermeasures (at least 4 mitigations), based on the defense-in-depth strategy. Give use cases for each countermeasure and discuss how they can be deployed for the scenario of the lab:
+server-side
+client-side
+The administration interface is under the admin link on the main page.
+
+If you need a server to capture the leak, you can do one of the following:
+Send your requests to https://requestbin.whapi.cloud/Links to an external site.
+Run a server using the command: socat TCP-LISTEN:80,reuseaddr,fork - or quickly write a simple server with, for example, Node.js.
+Note: If you use requestbin, don't follow their advice of using fetch (the PhantomJS script is too old to support it), and use the http version instead of https in the request.
+
+Note: Solutions with visible traces (such as broken images) are not valid.
+
+Extra: Can you come up with a possible patch for the website code?
+
+Part 2: SQL Injection
+Your objective is to find an SQL-Injection vulnerability in the web application and to exploit it in a way that the server makes your requests to the database.
+
+In the report you should include the following  (and please make sure you have answered all the questions):
+A description of all SQL-injection vulnerabilities you've found:
+What's the root of the problem?
+On which page(s) did you find the vulnerability? can the other pages be used for the exploit?
+What's the rationale behind the successful SQL query? please explain the elements of the query in details.
+Exploit the FILE privilege of the blog user to read the "/etc/passwd" file. 
+Find a writing directory and inject a webshell to get remote execution in the server.
+Explain the webshell you used. 
+How did you inject the webshell? How did you find the directory exists and is writable?
+What are the other directories you tried and failed?
+Include a comprehensive discussion of possible countermeasures, based on the defense-in-depth strategy. Give use cases for each countermeasure and discuss how they can be deployed for the scenario of the lab:
+Web application itself
+Please include an example of an insecure query and how it can be secured. 
+How can we make sure that user input is treated as data in a query?
+Database system
+Operating system
+You'll need to describe how to learn
+(i) which user we are when we execute queries in the database,
+(ii) which user we are at the OS level when we create the webshell (who is the owner?), and
+(iii) which user we are when we execute commands in the webshell.
+Are the users above the same? if not, why do they differ? What can be done on the OS level to fix the issue?
+Which privileges and permission can be changed in the database and on the OS level to limit file access? 
+Security configuration of the above
+Hint: A possible webshell is <?php system($_GET['c']);?>
+
+Extra: Your admin access might expire within a short time. How can you get future access without changing the administrator password? What do you suggest to mitigate this vulnerability in particular?
+
+Links
+XSS warm-up exerciseLinks to an external site. with cake at the end (by Artur Janc, Google)
+XSS and SQL injection tutorialLinks to an external site.. 
+Advanced SQL Injection Download Advanced SQL Injection, Chris Anley, NGSSoftware, 2002
+Cross-Site ScriptingLinks to an external site. - OWASP
+Report
+Use the Fire system to submit your assignments. 
+
+Please, submit a report that includes your answers from parts 1 and 2.
+Since we want you to learn something, the report should demonstrate that you have understood the attacks and the respective defense mechanisms, and not just copy-pasted from a different source.
+Important: No automatic security scanners like sqlmap can be used for the lab.
+Important: Submissions with poor discussions of countermeasures will be rejected.  If you are unsure what countermeasures to cover, it should be at least the ones discussed in the lectures!
+Important: You need to meet the requirements for a written report that documents your lab solution and pass a lab presentation with the TA who graded it, no later than 2 weeks after passing the written part (new in 2026). During the presentation, each student in the group must individually demonstrate sufficient understanding of the submitted solution, explain key design and implementation choices, and answer questions about the code and report. The presentation will be used to verify that all group members have actively contributed to the work and can account for the solution independently. 
