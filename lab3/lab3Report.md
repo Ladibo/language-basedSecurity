@@ -4,8 +4,9 @@
 
 > Describe the XSS vulnerabilitie(s) you found
 
-Stored XSS in comment Text field on post.php?id=n, where n is the post id. You can write a script payload, which will be saved in the database and executed in a users browser w
-.t sop ralucitra(p) taht seiv resu a revene
+Stored XSS in comment Text field on post.php?id=n, where n is the post id. You can write a script payload, which will be saved in the database and executed in a users browser whenever that user views / visits that particular post.
+
+
 
 > A detailed, step-by-step description of the attack that you have designed to hijack the administrator session information
 

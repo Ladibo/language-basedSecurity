@@ -1,0 +1,132 @@
+Introduction
+The purpose of this assignment is to explore vulnerabilities and protection methods in mobile applications.
+
+In this lab, you are going to explore security mechanisms for Android. With the example of Android's permission system you will learn that current security mechanisms are a good start but not sufficient to fulfill their purpose "to protect the privacy of an Android user" (src: Android docsLinks to an external site.). You will gain access to sensitive system data, trick an app into exposing sensitive data, and investigate countermeasures to protect from these and related attacks.
+
+ 
+
+Before you start
+Download the files needed for this lab
+Install Android StudioLinks to an external site.
+Setup an emulator for testing (linux)
+Using Tools -> AVD Manager (or CTRL + Shift + a, and type avd) in Android Studio, create a device using the Nexus 4 template
+Do not use the recommended target 'Android API 28 (Google APIs)
+Instead, through the x86 Images tab, use target Android API 28, ABI x86
+Set the emulator name to be 'LBS'. Do not run it from here.
+Run start_emulator.sh
+If the script complains, then use Hardware GLS for the Graphics on the emulator
+If Android Studio complains about not accepting licenses, go to ~/Android/sdk/tools/bin and run ./sdkmanager --licenses
+Once the emulator has booted to the home screen, run configure_emulator.sh
+When you have completed the task for Part 1, run test_emulator.sh, changing the commented line to use your local server
+If the test script complains, don't worry! you can manually test the app using the emulator GUI
+Setup an emulator for testing (windows)
+1. Download Android StudioLinks to an external site. 
+2. Install with all default options
+3. Start Android studio
+4. Do not import settings
+5. Pick standard install and allow download of the recommended items
+6. Pick open existing project. Open MacLocation.
+
+7. If asked, click "ok" to recreate gradle files
+8. If you get an error about "SDK location not found."
+8.1. Add ANDROID_HOME as an environment variable
+9. In Android Studio, go to the Virtual Device Manager and download the Pie image (API Level 28, ABI x86)
+9.1. Rename it to LBS if you want.
+10. Press to play button under Actions to start the device.
+11. In Android studio, Go to "File -> Sync Project with Gradle Files".
+12. Now you should have the ability to run the project. Pick your virtual device.
+Note that you will not be able to use the scripts to automate the exfiltration.
+Understand basic Android app developmentLinks to an external site.
+In case you face any incompatibility errors with the versions of Gradle and your Java, change their versions manually under File -> Project Structure to older versions; e.g., Android Gradle Plugin Version: 4.2.1 | Gradle Version: 6.7.1 | JDK 8
+
+ You might also need to modify “start_emulator.sh”, “configure_emulator.sh”, and “test_emulator.sh”: 
+for example, in MacOS, you should use cd ~/Library/Androidsdk/emulator
+
+Part 1: No-permission Apps
+The Android application system builds on apps requesting permissions to do certain tasks, such as accessing contacts or text messages on the phone. Although permissions should show what an app might want to do, users may not install apps which request too intrusive permissions.
+However, it is possible to get hold of sensitive information without requesting permissions by exploiting other apps.
+For this task, you should collect location data by reading sensitive network information from the Android system, and exfiltrate the data from the device to a network end-point you control. All this should be done without using a single permission.
+Preparation:
+Read the paper by Zhou et al. on no-permission apps
+Make sure you know how to open a browser from another app. If you get stuck, have a look at Browser IntentsLinks to an external site..
+Use the MACLocation app stub from the archive
+Get familiar with the existing code, in particular, the MainActivity class.
+Practical Tasks:
+Implement the following methods:
+MainActivity.addItem should read out the data from the system and store it in ArrayList<Item> mItemsData
+MainActivity.onYes should create an Intent so that the data is sent to a server reachable through the given URL.
+Report:
+Briefly describe the permission system in Android. For example:
+How are permissions defined? provide an example and explain it.
+What do they protect?
+Against who and what do they protect?
+What is the root of the problem? Why can you access this information?
+Explain your implementation:
+In a few own words, what does your code do?
+Which data do you retrieve? Where does it come from? What information does it contain? Why can you read it?
+How do you exfiltrate the data from the device? Why is no permission like INTERNET needed to send the data out?
+Extra: Is it still exploitable on devices that run Android 10 or higher? If no, please explain the reason. If yes, would the attack scenario be the same?
+Part 2: Malicious Intents
+Security vulnerabilities in apps can lead to internal app data being exposed to attackers.
+Your goal is to leverage a security bug in the app from Part 1 by tricking it into exposing internal app data through a malicious Intent.
+Preparation:
+Read the paper or watch the video Links to an external site. by Felt et al. on confused deputy attacks in Android.
+Get familiar with the existing code, in particular the DatabaseActivity class from Part 1.
+Make sure you know what an Explicit Intent Links to an external site. is.
+Use the MACIntent app stub from the archive as the starting point for this task.
+Practical Tasks:
+Implement the following methods in the new app:
+MainActivity.act implements the button event handler. The handler should send an Intent to the app from Part 1 such that it exposes data in the result.
+MainActivity.onActivityResult should create an Intent such that the data is sent to a server reachable through the given URL.
+A "ClassNotFound" error is to be expected, you will have to add appropriate files to your code for it to work.
+
+Report:
+Briefly describe the code in DatabaseActivity.onCreate:
+In your own words, what does the code do?
+How can an Intent influence method execution?
+What is the returned result value?
+On an abstract level, what is the root of the problem? Why can you access the data?
+Evaluate the existing checks in the code:
+What are the conditions in the if-statement in DatabaseActivity.onCreate checking for?
+Why are they not sufficient? How can we circumvent them?
+Explain your implementation of MainActivity.act:
+Describe the Intent to call DatabaseActivity. Which are the important parameters to trick DatabaseActivity to expose the data?
+Which role does the class name MainActivity play in the attack?
+Briefly explain your implementation of MainActivity.onActivityResult.
+Part 3: Protections and Mitigations
+Preparation:
+Read through the security best practices Links to an external site. for Android apps.
+Read the above-linked papers (if you haven't done so yet).
+Report:
+Imagine you are a Google engineer with the task to fix the above security issues. That is, you have all the power to modify Android in anyway you want.
+Which system modifications can you implement on the Linux level?
+Which system modifications can you implement on the Android API level?
+Which of these modifications fix Part 1? Which Part 2?
+Specific to Part 2 (no system modifications):
+Which configuration options exist for Android components to control their availability? Explain the relevant one(s) for Part 2.
+How can you secure the code programmatically? For example, how can the conditions in the if-statement in DatabaseActivity.onCreate be corrected?
+Are there other protections/mitigations?
+For all protections and mitigations, consider the following in your explanation:
+
+Which are the pro's and con's?
+Is it a protection or "only" a mitigation?
+What does it protect against? What is still possible? What is not?
+Practical Task (optional):
+Everything is more fun when you see it in action. Go ahead and try out the protections you found!
+
+ 
+
+More Links
+Adrienne has several publicationsLinks to an external site. on Android's permission system.
+Official Android documentation Links to an external site. , in particular Android permissions Links to an external site.
+This lab was inspired by a courseLinks to an external site. at CMU.
+ 
+
+To keep in mind
+Use the Fire system to submit your assignments. 
+
+Please, submit a report that includes your answers from part 1, 2 and 3, along with source code of your implementation. 
+Since we want you to learn something, the report should demonstrate that you have understood the attacks and the respective defense mechanisms.
+Important: Submissions with poor discussions of countermeasures will be rejected. If you are unsure what countermeasures to cover, it should be at least the ones discussed in the lectures!
+Important: If you are using this as your project, you will also need to submit a writeup of solutions (explanations of how you've solved) the first 5 IFCLinks to an external site. Challenges,  and the following  RealSecLinks to an external site. challenges: 5Links to an external site., 6Links to an external site., 8Links to an external site., and 9Links to an external site.. The writeup should be sufficiently detailed to recreate your solutions.
+Important: You need to meet the requirements for a written report that documents your lab solution and pass a lab presentation, no later than 2 weeks after passing the written part (new in 2026). During the presentation, each student in the group must individually demonstrate sufficient understanding of the submitted solution, explain key design and implementation choices, and answer questions about the code and report. The presentation will be used to verify that all group members have actively contributed to the work and can account for the solution independently. 
